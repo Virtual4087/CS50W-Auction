@@ -1,0 +1,135 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="listing_page">
+        <div class="item">
+            <div class="product_image_container">
+                {% if listing.image %}
+                    <img src="{{listing.image}}" class="product_image">
+                {% else %}
+                    <img src="https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg" class="product_image">
+                {% endif %}
+            </div>
+            <div class="details">
+                <div class="title">{{listing.product.upper}}</div>{% if not listing.status %}<span class="closed_listing">[Closed]</span>{% endif %}
+                <div class="description">{{listing.description}}</div>
+                <div class="categories"><strong>Categories - </strong>
+                    {% for category in listing.categories.all %}
+                        <form class="Categories" action="{% url 'categories'%}" method="GET">
+                            <input type="hidden" name="category" value="{{category.id}}">
+                            <input type="submit" value="{{category}}" class="submit">
+                        </form>
+                    {% empty %}
+                        <span>none</span>
+                    {% endfor %}
+                </div>
+                <div class="price">Price: ${{listing.price}}.00</div>
+                {% if listing.status %}
+                    {% if highest_bid.bid %}
+                        <div class="highest_bid">Highest bid: ${{highest_bid.bid}}.00</div>
+                    {% else %}
+                        <div class="highest_bid">No bids yet</div>
+                    {% endif %}
+                {% else %}
+                    {% if user == highest_bid.username %}
+                        <div class="highest_bid">You bought this item for ${{highest_bid.bid}}.00</div>
+                    {% else %}
+                        <div class="highest_bid">Sold for ${{highest_bid.bid}}.00</div> 
+                    {% endif %}
+                {% endif %}
+
+                <!-- Watchlist and Bidding -->
+                {% if user.is_authenticated and listing.status and user != listing.username %}
+                    <form class="Bid" action="{% url 'listing' product_id=listing.id %}" method="POST">
+                        {% csrf_token %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-dollar" viewBox="0 0 16 16">
+                            <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/></svg>
+                        {% if highest_bid.bid >= listing.price %}
+                            <input type="number" name="bid" min="{{ highest_bid.bid|add:1 }}" value="{{ highest_bid.bid|add:1 }}" class="bid_box">
+                        {% else %}
+                            <input type="number" name="bid" min="{{ listing.price }}" value="{{ listing.price }}" class="bid_box">
+                        {% endif %}
+                        <button type="submit" class="bid">Bid</span>
+                        </button>
+                    </form>
+
+                    <form class= "Watchlist" action="{% url 'watchlist' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="listing" value="{{listing.id}}">
+                        {% if not watchlist %}
+                            <input type="hidden" name="add">
+                            <button type="submit" class="watchlist">
+                                <svg id="watchlist_image" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>
+                                <span id="watchlist_text">Add to watchlist</span>
+                            </button>
+                        {% else %}
+                            <input type="hidden" name="remove">
+                            <button type="submit" class="watchlist">
+                                <svg id="watchlist_image" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-heartbreak-fill" viewBox="0 0 16 16">
+                                <path d="M8.931.586 7 3l1.5 4-2 3L8 15C22.534 5.396 13.757-2.21 8.931.586ZM7.358.77 5.5 3 7 7l-1.5 3 1.815 4.537C-6.533 4.96 2.685-2.467 7.358.77Z"/>
+                                </svg><span id="watchlist_text">Remove from watchlist</span>
+                            </button>
+                        {% endif %}
+                    </form>
+
+                <!-- Allows the user to remove a closed listing from their watchlist -->
+
+                {% elif not listing.status and watchlist %}
+                    <form class= "Watchlist" action="{% url 'watchlist'%}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="listing" value="{{listing.id}}">
+                        <input type="hidden" name="remove">
+                        <button type="submit" class="watchlist">
+                            <svg id="watchlist_image" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-heartbreak-fill" viewBox="0 0 16 16">
+                            <path d="M8.931.586 7 3l1.5 4-2 3L8 15C22.534 5.396 13.757-2.21 8.931.586ZM7.358.77 5.5 3 7 7l-1.5 3 1.815 4.537C-6.533 4.96 2.685-2.467 7.358.77Z"/>
+                            </svg><span id="watchlist_text">Remove from watchlist</span>
+                        </button>
+                    </form>   
+                {% endif %}
+
+                {% if user == listing.username and listing.status == True %}
+                <form class="Close" action="{% url 'listing' product_id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="close">
+                    <button type="submit" name="close" class="close_auction">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                        </svg>
+                        <span>Close Auction</span>
+                    </button>
+                </form>
+                {% endif %}
+                <div class="date">Created on {{listing.date}} by {{listing.username}}</div>
+            </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="comments">
+            <div class="title">Comments</div>
+            {% if user.is_authenticated and listing.status %}
+                <form class="post" action="{% url 'listing' product_id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <textarea name="comment" placeholder="Add your comment" required></textarea>
+                    <div class="buttons">
+                        <button type="submit" class="submit">Comment</button>
+                        <button type="reset">Cancel</button>
+                    </div>
+                </form>
+            {% endif %}
+            <ul class="all_comments">
+            {% for comment in comments %}
+                <li class="comment">
+                    <div>
+                        <strong>{{comment.username}}</strong>
+                    </div>
+                    <p>{{comment.comment}}</p>
+                </li>
+                <hr>
+            {% empty %}
+                <div>Be the first one to comment!</div>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
