@@ -1,1 +1,1 @@
-An auctions website created using django that uses sqlite as database.
+An auction website created using django that uses sqlite as database.
