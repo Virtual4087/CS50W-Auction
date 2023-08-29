@@ -25,7 +25,7 @@ class Testing(TestCase):
         """Checking categories"""
         category = Category.objects.first()
         self.assertEqual(category.category, "protein")
-        self.assertEqual(category.categories.first().product, "Eg")
+        self.assertEqual(category.categories.first().product, "Egg")
 
     def test_bidding(self):
         """Checking the highest bid and lowest bid of a listing"""
