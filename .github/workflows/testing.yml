@@ -8,6 +8,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run unit test
       run:
-        cd commerce
+        cd commerce;
         pip3 install --user django
         python manage.py test
