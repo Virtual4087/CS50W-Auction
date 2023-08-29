@@ -9,5 +9,5 @@ jobs:
     - name: Run unit test
       run:
         cd commerce;
-        pip3 install --user django
+        pip3 install --user django;
         python manage.py test
