@@ -33,6 +33,6 @@ class Testing(TestCase):
         response = c.get("/")
         Highest_bid = response.context["listings"].first().product_bids.last()
         Lowest_bid = response.context["listings"].first().product_bids.first()
-        self.assertEqual(Highest_bid.bid, 2000)
+        self.assertEqual(Highest_bid.bid, 200)
         self.assertEqual(Lowest_bid.bid, 70)
 
