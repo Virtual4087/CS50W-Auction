@@ -23,8 +23,8 @@
                             </form>
                         {% endfor %}
                     </div>
-                    {% if listing.highest_bid.bid %}
-                        <div class="price">${{listing.highest_bid.bid}}.00</div>
+                    {% if listing.product_bids.last.bid %}
+                        <div class="price">${{listing.product_bids.last.bid}}.00</div>
                     {% else %}
                         <div class="price">${{listing.price}}.00</div>
                     {% endif %}

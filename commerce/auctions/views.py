@@ -6,19 +6,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from .models import User, Listing, Category, Bid, Comment, Watchlist
 
-#Takes a queryset and adds a highest_bid attribute to it   
-def adding_highestbid(listings):
-    for listing in listings:
-        if listing.product_bids.all():
-            listing.highest_bid = listing.product_bids.latest('bid')
-        else:
-            listing.highest_bid = None
-    return listings
-
 def index(request):
-    listings = adding_highestbid(Listing.objects.all())
     return render(request, "auctions/index.html", {
-        "listings" : listings,
+        "listings" : Listing.objects.all(),
         "search_for" : "Active Listings",
     })
 
@@ -106,7 +96,7 @@ def create_auction(request):
 def listing(request, product_id):  
 
     listing = Listing.objects.get(pk= product_id)
-    highest_bid = listing.product_bids.order_by('bid').last()
+    highest_bid = listing.product_bids.last()
     comments = Comment.objects.filter(product= listing)
 
     if request.user.is_authenticated:
@@ -151,28 +141,25 @@ def listing(request, product_id):
 
 @login_required
 def my_listings(request):
-    my_listings = adding_highestbid(Listing.objects.filter(username = request.user)) 
     return render(request, "auctions/index.html", {
-        "listings" : my_listings,
-        "search_for" : "My Listings"
+        "listings" : Listing.objects.filter(username = request.user),
+        "search_for" : "My Listings",
     })
 
 @login_required
 def history(request):
     purchases = []
-    closed_listings = adding_highestbid(Listing.objects.filter(status= False))
+    closed_listings = Listing.objects.filter(status= False)
     for listing in closed_listings:
         try:
-            if listing.highest_bid.username == request.user:
+            if listing.product_bids.last().username == request.user:
                 purchases.append(listing.id)  
         except AttributeError:
             continue 
 
-    #Adds highest_bid attribute in purchase_history since .filter doesn't return a field that is not stored in the database
-    purchase_history = adding_highestbid(closed_listings.filter(pk__in=purchases))
     return render(request, "auctions/index.html", {
-        "listings" : purchase_history,
-        "search_for" : "Purchase History"
+        "listings" : closed_listings.filter(pk__in=purchases),
+        "search_for" : "Purchase History",
     })
 
 @login_required
@@ -188,10 +175,9 @@ def watchlist(request):
             user_watchlist.product.remove(listing)
         return redirect("listing", product_id=listing.id)
 
-    watchlist = adding_highestbid(user_watchlist.product.all())
     return render(request, "auctions/index.html", {
-        "listings" : watchlist,
-        "search_for" : "Watchlist"
+        "listings" : user_watchlist.product.all(),
+        "search_for" : "Watchlist",
     } )
 
 def categories(request):
