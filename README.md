@@ -5,11 +5,12 @@
 # Setup Guide
 - Download the source code
 - Install Django
+- Install Sqlite3
 - Run python manage.py makemigrations auctions
 - Run python manage.py migrate
 - Run python manage.py runserver
 
-**Note:- There are no categories at the start if you want to add any categories do it through django admin**
+**Note:- There are no categories at the start so if you want to add any categories do it through Sqlite shell or django admin for easier access.**
 # To setup Django admin interface
 - Run python manage.py createsuperuser
 - Setup the username, email and passowrd
