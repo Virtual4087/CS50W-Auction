@@ -16,3 +16,5 @@
 - Setup the username, email and passowrd
 - Visit /admin and make direct changes to the database
 
+- 
+
