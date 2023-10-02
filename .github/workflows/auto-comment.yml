@@ -1,41 +1,30 @@
-name: Auto Comment
+name: Issue & PR Comment
 
 on:
-  issues:
-    types: [opened]
-  pull_request:
-    types: [closed]
+ issues:
+    types:
+      - opened
+ pull_request:
+    types:
+      - opened
+      - closed
 
 jobs:
-  auto-comment:
+ comment:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Set up Git
-        uses: actions/setup-node@v3
+      - name: Comment on issue or pull request
+        uses: actions/github-script@v5
         with:
-          node-version: '14'
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Install jq (JSON processor)
-        run: sudo apt-get install jq
-
-      - name: Run auto-comment script
-        run: |
-          #!/bin/bash
-
-          REPO_OWNER=$(jq -r ".repository.owner.login" "$GITHUB_EVENT_PATH")
-          REPO_NAME=$(jq -r ".repository.name" "$GITHUB_EVENT_PATH")
-          AUTHOR=$(jq -r ".sender.login" "$GITHUB_EVENT_PATH")
-
-          if [[ $GITHUB_EVENT_NAME == "issues" ]]; then
-            COMMENT="Thank you @$AUTHOR for bringing up this issue to help enhance our project even further! I'll review it sooner. 🙌❤️"
-          elif [[ $GITHUB_EVENT_NAME == "pull_request" && $GITHUB_EVENT_ACTION == "closed" && $(jq -r ".pull_request.merged" "$GITHUB_EVENT_PATH") == "true" ]]; then
-            PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
-            COMMENT="Congratulations @$AUTHOR! 🎉 Your pull request has been merged. Thanks for your valuable contribution! 🙌"
-            curl -X POST -H "Authorization: Bearer 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" -H "Content-Type: application/json" \
-              -d "{\"body\":\"$COMMENT\"}" \
-              "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$PR_NUMBER/comments"
-          fi
+          script: |
+            const issueOrPr = context.payload.issue || context.payload.pull_request;
+            const author = issueOrPr.user.login;
+            const comment = context.payload.action === 'opened'
+              ? `Thank you @${author} for bringing up this issue to help enhance our project even further! I'll review it sooner. 🙌🎉`
+              : `Congratulations @${author}! 🎉 Your pull request has been merged. Thanks for your valuable contribution! 🙌`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueOrPr.number,
+              body: comment
+            });
