@@ -35,7 +35,7 @@ jobs:
           elif [[ $GITHUB_EVENT_NAME == "pull_request" && $GITHUB_EVENT_ACTION == "closed" && $(jq -r ".pull_request.merged" "$GITHUB_EVENT_PATH") == "true" ]]; then
             PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
             COMMENT="Congratulations @$AUTHOR! 🎉 Your pull request has been merged. Thanks for your valuable contribution! 🙌"
-            curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Content-Type: application/json" \
+            curl -X POST -H "Authorization: Bearer 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" -H "Content-Type: application/json" \
               -d "{\"body\":\"$COMMENT\"}" \
               "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$PR_NUMBER/comments"
           fi
