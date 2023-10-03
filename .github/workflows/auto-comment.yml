@@ -1,5 +1,12 @@
 name: Auto Comment
-on: [issues, pull_request]
+on: 
+  issues:
+    types:
+      - opened
+  pull_request:
+    types:
+      - opened
+      - closed
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -10,6 +17,6 @@ jobs:
           issuesOpened: |
             Thank you @{{ author }} for bringing up this issue to help enhance our project even further! I'll review it sooner. 🙌❤️
 
-          pullRequestClosed: |
+          pullRequestMerged: |
             Congratulations @{{ author }}! 🎉 Your pull request has been merged. Thanks for your valuable contribution! 🙌
 
