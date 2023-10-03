@@ -8,12 +8,8 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
           issuesOpened: |
-            👋 @{{ author }}
-            Thank you for raising an issue. We will will investigate into the matter and get back to you as soon as possible.
-            Please make sure you have given us as much context as possible.
+            Thank you @{{ author }} for bringing up this issue to help enhance our project even further! I'll review it sooner. 🙌❤️
 
-          pullRequestOpened: |
-            👋 @{{ author }}
-            Thank you for raising your pull request.
-            Please make sure you have followed our contributing guidelines. We will review it as soon as possible
+          pullRequestMerged: |
+            Congratulations @{{ author }}! 🎉 Your pull request has been merged. Thanks for your valuable contribution! 🙌
 
