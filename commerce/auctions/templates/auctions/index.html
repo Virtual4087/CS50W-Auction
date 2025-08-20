@@ -67,6 +67,38 @@ Listings" or search_for == "Purchase History" or search_for == "Watchlist" %}
 		</div>
 		{% endif %} {% endif %}
 
+		<!-- Payment Status for Buyer in Purchase History -->
+		{% if search_for == "Purchase History" and not listing.status and
+		listing.product_bids.last %} {% if listing.payment_completed %}
+		<div
+			style="
+				margin-top: 8px;
+				padding: 8px 12px;
+				background-color: #d4edda;
+				color: #155724;
+				border-radius: 4px;
+				font-size: 14px;
+				font-weight: 600;
+			"
+		>
+			✅ Payment Completed - Item Purchased!
+		</div>
+		{% else %}
+		<div
+			style="
+				margin-top: 8px;
+				padding: 8px 12px;
+				background-color: #ffebee;
+				color: #c62828;
+				border-radius: 4px;
+				font-size: 14px;
+				font-weight: 600;
+			"
+		>
+			💳 Payment Required - Complete Purchase
+		</div>
+		{% endif %} {% endif %}
+
 		<div class="description">{{listing.description}}</div>
 		<div class="date">Created on {{listing.date}}</div>
 	</div>
