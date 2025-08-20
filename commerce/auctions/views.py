@@ -99,7 +99,14 @@ def listing(request, product_id):
     highest_bid = listing.product_bids.last()
     comments = Comment.objects.filter(product= listing)
 
+    # Check if user is authenticated and has a watchlist
+    user_watchlist = None
     if request.user.is_authenticated:
+        try:
+            user_watchlist = Watchlist.objects.get(username=request.user)
+        except Watchlist.DoesNotExist:
+            # Create watchlist if it doesn't exist
+            user_watchlist = Watchlist.objects.create(username=request.user)
 
         if request.method == 'POST':
 
@@ -131,11 +138,10 @@ def listing(request, product_id):
                     listing.save()
                     return redirect("index")
 
-
     return render(request, "auctions/listing.html", {
         "listing" : listing ,
         "highest_bid" : highest_bid,
-        "watchlist" : listing in Watchlist.objects.get(username=request.user).product.all() if request.user.is_authenticated else False,
+        "watchlist" : listing in user_watchlist.product.all() if user_watchlist else False,
         "comments" : comments
     })
 
