@@ -1,39 +1,79 @@
-{% extends "auctions/layout.html" %}
+{% extends "auctions/layout.html" %} {% block body %}
+<h2 class="page_name">{{search_for}}</h2>
+{% for listing in listings %} {% if listing.status or search_for == "My
+Listings" or search_for == "Purchase History" or search_for == "Watchlist" %}
+<div class="item">
+	<div class="product_image_container">
+		<a href="{% url 'listing' product_id=listing.id %}">
+			{% if listing.image %}
+			<img src="{{listing.image}}" class="product_image" />
+			{% else %}
+			<img
+				src="https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg"
+				class="product_image"
+			/>
+			{% endif %}
+		</a>
+	</div>
+	<div class="details">
+		<a href="{% url 'listing' product_id=listing.id %}" class="title"
+			>{{listing.product.upper}}</a
+		>
+		{% if not listing.status %}<span class="closed_listing">[Closed]</span>{%
+		endif %}
+		<div class="categories">
+			{% for category in listing.categories.all %}
+			<form class="Categories" action="{% url 'categories'%}" method="GET">
+				<input type="hidden" name="category" value="{{category.id}}" />
+				<input type="submit" value="{{category}}" class="submit" />
+			</form>
+			{% endfor %}
+		</div>
+		{% if listing.product_bids.last.bid %}
+		<div class="price">${{listing.product_bids.last.bid}}.00</div>
+		{% else %}
+		<div class="price">${{listing.price}}.00</div>
+		{% endif %}
 
-{% block body %}
-    <h2 class="page_name">{{search_for}}</h2>
-    {% for listing in listings %}
-        {% if listing.status or search_for == "My Listings" or search_for == "Purchase History" or search_for == "Watchlist" %}
-            <div class="item">
-                <div class="product_image_container"><a href="{% url 'listing' product_id=listing.id %}">
-                    {% if listing.image %}
-                        <img src="{{listing.image}}" class="product_image">
-                    {% else %}
-                        <img src="https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg" class="product_image">
-                    {% endif %}
-                </a></div>
-                <div class="details">
-                    <a href="{% url 'listing' product_id=listing.id %}" class="title">{{listing.product.upper}}</a>
-                    {% if not listing.status %}<span class="closed_listing">[Closed]</span>{% endif %}
-                    <div class="categories">
-                        {% for category in listing.categories.all %}
-                            <form class="Categories" action="{% url 'categories'%}" method="GET">
-                                    <input type="hidden" name="category" value="{{category.id}}">
-                                    <input type="submit" value="{{category}}" class="submit">
-                            </form>
-                        {% endfor %}
-                    </div>
-                    {% if listing.product_bids.last.bid %}
-                        <div class="price">${{listing.product_bids.last.bid}}.00</div>
-                    {% else %}
-                        <div class="price">${{listing.price}}.00</div>
-                    {% endif %}
-                    <div class="description">{{listing.description}}</div>
-                    <div class="date">Created on {{listing.date}}</div>
-                </div>
-            </div>
-        {% endif %}
-    {% empty %}
-            <img src="https://img.freepik.com/free-vector/business-team-looking-new-people-allegory-searching-ideas-staff-woman-with-magnifier-man-with-spyglass-flat-illustration_74855-18236.jpg?w=1380&t=st=1689600591~exp=1689601191~hmac=3a19386cfa205ff999efee0db9310c1bebed26e738290f5382837274bef13c7c" class="empty">
-    {% endfor %}
-{% endblock %}
+		<!-- Payment Status for Listing Owner -->
+		{% if search_for == "My Listings" and not listing.status and
+		listing.product_bids.last %} {% if listing.payment_completed %}
+		<div
+			style="
+				margin-top: 8px;
+				padding: 8px 12px;
+				background-color: #d4edda;
+				color: #155724;
+				border-radius: 4px;
+				font-size: 14px;
+				font-weight: 600;
+			"
+		>
+			✅ Payment Received - Sale Complete!
+		</div>
+		{% else %}
+		<div
+			style="
+				margin-top: 8px;
+				padding: 8px 12px;
+				background-color: #fff3cd;
+				color: #856404;
+				border-radius: 4px;
+				font-size: 14px;
+				font-weight: 600;
+			"
+		>
+			⏳ Awaiting Payment from {{listing.product_bids.last.username}}
+		</div>
+		{% endif %} {% endif %}
+
+		<div class="description">{{listing.description}}</div>
+		<div class="date">Created on {{listing.date}}</div>
+	</div>
+</div>
+{% endif %} {% empty %}
+<img
+	src="https://img.freepik.com/free-vector/business-team-looking-new-people-allegory-searching-ideas-staff-woman-with-magnifier-man-with-spyglass-flat-illustration_74855-18236.jpg?w=1380&t=st=1689600591~exp=1689601191~hmac=3a19386cfa205ff999efee0db9310c1bebed26e738290f5382837274bef13c7c"
+	class="empty"
+/>
+{% endfor %} {% endblock %}

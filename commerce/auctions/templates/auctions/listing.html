@@ -123,6 +123,30 @@
                     </button>
                 </form>
                 {% endif %}
+                
+                <!-- Payment Status for Listing Owner -->
+                {% if user == listing.username and not listing.status and highest_bid %}
+                    {% if payment_completed %}
+                        <div style="margin-top: 15px; padding: 15px; border: 2px solid #28a745; border-radius: 5px; background-color: #d4edda;">
+                            <div style="color: #155724; font-weight: 600; margin-bottom: 5px;">
+                                ✅ Payment Received!
+                            </div>
+                            <div style="color: #155724; font-size: 14px;">
+                                {{highest_bid.username}} has completed payment of ${{highest_bid.bid}}.00. Sale finalized!
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="margin-top: 15px; padding: 15px; border: 2px solid #f0ad4e; border-radius: 5px; background-color: #fff3cd;">
+                            <div style="color: #856404; font-weight: 600; margin-bottom: 5px;">
+                                ⏳ Awaiting Payment
+                            </div>
+                            <div style="color: #856404; font-size: 14px;">
+                                Waiting for {{highest_bid.username}} to complete payment of ${{highest_bid.bid}}.00
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
                 <div class="date">Created on {{listing.date}} by {{listing.username}}</div>
             </div>
         </div>
