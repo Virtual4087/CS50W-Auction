@@ -12,5 +12,7 @@ urlpatterns = [
     path("my_listings", views.my_listings, name="my_listings"),
     path("watchlist", views.watchlist, name="watchlist"),
     path("history", views.history, name="history"),
-    path("categories", views.categories, name="categories")
+    path("categories", views.categories, name="categories"),
+    path("payment/<int:product_id>", views.create_payment, name="create_payment"),
+    path("payment/success/<int:product_id>", views.payment_success, name="payment_success"),
 ]

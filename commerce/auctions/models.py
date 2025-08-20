@@ -15,6 +15,7 @@ class Listing(models.Model):
     username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_listings" )
     image = models.URLField(blank=True, max_length=1000)
     categories = models.ManyToManyField('Category', blank=True, related_name="categories")
+    payment_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.product} was put on auction by {self.username.username}"

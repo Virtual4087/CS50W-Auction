@@ -26,15 +26,38 @@
                 <div class="price">Starting Bid: ${{listing.price}}.00</div>
                 {% if listing.status %}
                     {% if highest_bid.bid %}
-                        <div class="highest_bid">Highest bid: ${{highest_bid.bid}}.00</div>
+                        <div class="highest_bid">Highest bid: ${{highest_bid.bid}}.00
+                        {% if user == highest_bid.username %}
+                            <span class="highest_bid">(You are the highest bidder!)</span>
+                        {% endif %}
+                        </div>
                     {% else %}
                         <div class="highest_bid">No bids yet</div>
                     {% endif %}
                 {% else %}
                     {% if user == highest_bid.username %}
                         <div class="highest_bid">You bought this item for ${{highest_bid.bid}}.00</div>
+                        {% if not payment_completed %}
+                            <div class="payment-section" style="margin-top: 15px; padding: 15px; border: 2px solid #f0ad4e; border-radius: 5px; background-color: #fff3cd;">
+                                <p style="margin: 0 0 10px 0; color: #856404;"><strong>🔔 Payment Required</strong></p>
+                                <p style="margin: 0 0 15px 0; font-size: 14px; color: #6c757d;">Complete your purchase to finalize this transaction.</p>
+                                <form action="{% url 'create_payment' product_id=listing.id %}" method="POST" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background-color: #635bff; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.2s;">
+                                        💳 Pay ${{highest_bid.bid}}.00 with Stripe
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="payment-completed" style="margin-top: 15px; padding: 15px; border: 2px solid #28a745; border-radius: 5px; background-color: #d4edda; color: #155724;">
+                                <strong>✅ Payment Completed - Item Purchased!</strong>
+                            </div>
+                        {% endif %}
                     {% else %}
-                        <div class="highest_bid">Sold for ${{highest_bid.bid}}.00</div> 
+                        <div class="highest_bid">Sold for ${{highest_bid.bid}}.00</div>
+                        {% if payment_completed %}
+                            <div style="margin-top: 10px; color: #28a745; font-weight: 600;">✅ Payment Completed</div>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
 

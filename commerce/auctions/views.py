@@ -2,9 +2,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import User, Listing, Category, Bid, Comment, Watchlist
+import stripe
+
+# Set Stripe API key (use test key for development)
+stripe.api_key = "sk_test_51Ry8I8HvKIB8ACsmyeAahGKVpP0VXhir8oqD4zSrlO6I3APbGpRoz7XBxUf9hT9qxxhvwZqn2nCtPFNCVIcHX4D200CckMlqNd"  # Replace with your actual test secret key
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -142,7 +146,8 @@ def listing(request, product_id):
         "listing" : listing ,
         "highest_bid" : highest_bid,
         "watchlist" : listing in user_watchlist.product.all() if user_watchlist else False,
-        "comments" : comments
+        "comments" : comments,
+        "payment_completed": listing.payment_completed
     })
 
 @login_required
@@ -200,3 +205,51 @@ def categories(request):
     return render(request, "auctions/categories.html", {
         "categories" : categories, 
     })
+
+@login_required
+def create_payment(request, product_id):
+    listing = get_object_or_404(Listing, pk=product_id)
+    highest_bid = listing.product_bids.last()
+    
+    # Check if user is the winner and auction is closed
+    if not listing.status and highest_bid and highest_bid.username == request.user and not listing.payment_completed:
+        try:
+            # Create Stripe checkout session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': listing.product,
+                            'description': listing.description,
+                        },
+                        'unit_amount': int(highest_bid.bid * 100),  # Stripe uses cents
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri(reverse('payment_success', args=[product_id])),
+                cancel_url=request.build_absolute_uri(reverse('listing', args=[product_id])),
+            )
+            return redirect(session.url, code=303)
+        except Exception as e:
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "highest_bid": highest_bid,
+                "error": "Payment setup failed. Please try again."
+            })
+    
+    return redirect("listing", product_id=product_id)
+
+@login_required
+def payment_success(request, product_id):
+    listing = get_object_or_404(Listing, pk=product_id)
+    highest_bid = listing.product_bids.last()
+    
+    # Mark payment as completed
+    if highest_bid and highest_bid.username == request.user:
+        listing.payment_completed = True
+        listing.save()
+    
+    return redirect("listing", product_id=product_id)
